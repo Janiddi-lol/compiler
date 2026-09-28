@@ -75,7 +75,7 @@ class Lexer:
     t_TILD      = re.escape('~')
     
     #-----------------Ignore inputs--------------------
-    t_ignore = ' \t' # ignore all the whitepspaces
+    t_ignore = ' \t' # ignore spaces and tabs
     t_ignore_comment = r"//.*"
     
     def __init__(self, reporter: Reporter):
@@ -91,7 +91,7 @@ class Lexer:
         def token_with_end() -> TokenLike | None :
             t : TokenLike | None = token()
             if t is not None and not hasattr(t,'endlexpos'):
-                t.enlexpos = t.lexpos + len(t.value)
+                t.endlexpos = t.lexpos + len(t.value)
             return t
         
         self.lexer.token = token_with_end
@@ -107,13 +107,13 @@ class Lexer:
         self.bol.append(t.lexer.lexpos)
         
     def t_IDENT(self, t : TokenLike) -> TokenLike:
-        '[a-zA-Z_][a-zA-Z0-9_]*'
+        r'[a-zA-Z_][a-zA-Z0-9_]*'
         if t.value in self.keywords:
             t.type = self.keywords[t.value]
         return t
     
     def t_NUMBER(self, t: TokenLike) -> TokenLike:
-        '0|[1-9][0-9]*'
+        r'0|[1-9][0-9]*'
         t.endlexpos = t.lexpos + len(t.value)
         t.value = int(t.value)
         return t
