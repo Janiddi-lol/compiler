@@ -1,0 +1,9 @@
+// a variable declared in a loop body is not visible after the loop
+def main() {
+  var i = 0 : int;
+  while (i < 3) {
+    var sq = i * i : int;
+    i = i + 1;
+  }
+  print(sq);
+}

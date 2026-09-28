@@ -1,0 +1,18 @@
+// the initializer of a declaration is evaluated before the new
+// variable exists: it can read the variable it shadows
+def main() {
+  var x = 10 : int;
+  {
+    var x = x + 1 : int;
+    print(x);
+    { var x = x * 2 : int; print(x); }
+    print(x);
+  }
+  print(x);
+  var i = 0 : int;
+  while (i < 3) {
+    var i = i * 10 + 1 : int;
+    print(i);
+    break;
+  }
+}

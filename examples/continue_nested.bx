@@ -1,0 +1,20 @@
+// break and continue apply to the innermost loop, through blocks
+// and conditionals
+def main() {
+  var i = 0 : int;
+  while (i < 6) {
+    i = i + 1;
+    if (i % 2 == 0) { continue; }
+    var j = 0 : int;
+    while (true) {
+      j = j + 1;
+      if (j > 4) { break; }
+      if (j == 2) { continue; }
+      { if (i == 5) { if (j == 3) { break; } } }
+      print(10 * i + j);
+    }
+    print(-i);
+    if (i == 5) { break; }
+  }
+  print(i);
+}

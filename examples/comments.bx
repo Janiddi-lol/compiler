@@ -1,0 +1,19 @@
+// A comment before the program
+def main() { // a comment after the opening brace
+  var x = 1 : int; // a comment after a statement
+
+  // a comment
+  // on several
+  // lines
+
+  x = x + // a comment in the middle of an expression
+      41;
+  print( // a comment inside the parentheses
+    x
+  ); print(x); // two statements on one line, then a comment
+
+  // a commented-out statement: print(0);
+  print(x // 2);  ... this is a comment too, not a division
+  );
+} // a comment after the closing brace
+// and a terminal comment without a newline at the end of the file

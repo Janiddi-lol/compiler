@@ -1,0 +1,23 @@
+// blocks introduce scopes: shadowing (even with another type),
+// variables declared in loop bodies, empty blocks
+def main() {
+  var x = 5 : int;
+  var b = false : bool;
+  {
+    var x = true : bool;
+    if (x) { print(1); } else { print(-1); }
+    { var x = 9 : int; print(x); }
+    b = x;
+  }
+  print(x);
+  if (b) { } else { print(-2); }
+  { }
+  while (false) { }
+  var n = 0 : int;
+  while (n < 3) {
+    var sq = n * n : int;
+    if (n == 1) { var sq = -1 : int; print(sq); } else { print(sq); }
+    n = n + 1;
+  }
+  print(n);
+}

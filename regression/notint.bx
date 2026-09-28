@@ -1,0 +1,5 @@
+// ! applies to booleans only
+def main() {
+  var x = 1 : int;
+  if (!x) { print(0); }
+}

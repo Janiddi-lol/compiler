@@ -1,0 +1,27 @@
+// Division and modulus round towards zero; the remainder has the sign
+// of the dividend
+def main() {
+  var a = 7 : int;
+  var b = 2 : int;
+
+  print(a / b);              // 3
+  print(a % b);              // 1
+  print(-a / b);             // -3
+  print(-a % b);             // -1
+  print(a / -b);             // -3
+  print(a % -b);             // 1
+  print(-a / -b);            // 3
+  print(-a % -b);            // -1
+
+  print(0 / a);              // 0
+  print(0 % a);              // 0
+  print(a / a);              // 1
+  print(a % a);              // 0
+  print(b / a);              // 0
+  print(b % a);              // 2
+
+  print((a * a) / (b * b));  // 49 / 4 = 12
+  print((a * a) % (b * b));  // 49 % 4 = 1
+  print(-1000000007 / 13);   // -76923077
+  print(-1000000007 % 13);   // -6
+}

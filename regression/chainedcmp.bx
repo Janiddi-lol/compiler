@@ -1,0 +1,4 @@
+// comparisons are not associative: 1 < 2 < 3 is a syntax error
+def main() {
+  if (1 < 2 < 3) { print(1); }
+}

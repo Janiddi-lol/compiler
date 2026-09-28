@@ -1,0 +1,12 @@
+// && and || are short-circuiting: the right operand is not evaluated
+// when the left one decides (here, it would divide by zero)
+def main() {
+  var zero = 0 : int;
+  var n = 7 : int;
+  if (zero == 0 || n / zero > 1) { print(1); } else { print(-1); }
+  if (zero != 0 && n / zero > 1) { print(-2); } else { print(2); }
+  if (n > 0 && (zero == 0 || n % zero == 3)) { print(3); }
+  var i = 0 : int;
+  while (i < 5 && i * i != 9) { i = i + 1; }
+  print(i);
+}

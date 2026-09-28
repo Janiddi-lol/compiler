@@ -1,0 +1,7 @@
+// continue outside of any loop
+def main() {
+  var x = 1 : int;
+  if (x == 1) {
+    continue;
+  }
+}

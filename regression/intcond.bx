@@ -1,0 +1,7 @@
+// conditions must be booleans, not integers
+def main() {
+  var x = 1 : int;
+  while (x) {
+    x = x - 1;
+  }
+}

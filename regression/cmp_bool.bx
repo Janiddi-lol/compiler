@@ -1,0 +1,5 @@
+// == and != compare integers only, not booleans
+def main() {
+  var b = true : bool;
+  if (b == false) { print(0); }
+}

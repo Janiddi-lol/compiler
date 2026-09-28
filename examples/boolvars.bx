@@ -1,0 +1,20 @@
+// boolean variables hold the values true / false
+def main() {
+  var x = 7 : int;
+  var small = x < 10 : bool;
+  var even = x % 2 == 0 : bool;
+  var both = small && even : bool;
+
+  if (small) { print(1); } else { print(0); }
+  if (even) { print(1); } else { print(0); }
+  if (both) { print(1); } else { print(0); }
+  if (!both || even) { print(1); } else { print(0); }
+
+  var i = 0 : int;
+  var go = true : bool;
+  while (go) {
+    i = i + 1;
+    go = i * i < 50;
+  }
+  print(i);
+}

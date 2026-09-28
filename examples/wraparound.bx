@@ -1,0 +1,32 @@
+// Integers are 64-bit signed, in 2's complement: arithmetic wraps
+// around, and >> is an arithmetic shift
+def main() {
+  var max = 9223372036854775807 : int;      // 2^63 - 1
+  var min = -9223372036854775807 - 1 : int; // -2^63
+
+  print(max);
+  print(min);
+  print(max + 1);            // wraps to min
+  print(min - 1);            // wraps to max
+  print(max * 2);            // -2
+  print(min * 2);            // 0
+  print(-min);               // min
+  print(max % 10);           // 7
+  print(max / 2);            // 4611686018427387903
+
+  print(1 << 62);            // 4611686018427387904
+  print(1 << 63);            // min
+  print(3 << 62);            // -4611686018427387904 (-2^62)
+  print(-1 >> 1);            // -1
+  print(-8 >> 1);            // -4
+  print(min >> 63);          // -1
+  print(max >> 62);          // 1
+  print(min >> 1);           // -4611686018427387904
+
+  print(~0);                 // -1
+  print(~max);               // min
+  print(~min);               // max
+  print(max & min);          // 0
+  print(max | min);          // -1
+  print(max ^ min);          // -1
+}

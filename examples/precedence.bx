@@ -1,0 +1,36 @@
+// Associativity and precedence of the BX operators
+def main() {
+  var x = 7 : int;
+  var y = 3 : int;
+  var z = 2 : int;
+
+  // binary operators associate to the left
+  print(x - y - z);          // (7 - 3) - 2 = 2
+  print(x - (y - z));        // 7 - (3 - 2) = 6
+  print(x / y / z);          // (7 / 3) / 2 = 1
+  print(x / (y / z));        // 7 / (3 / 2) = 7
+
+  // * / % bind tighter than + -
+  print(x + y * z);          // 7 + (3 * 2) = 13
+  print((x + y) * z);        // (7 + 3) * 2 = 20
+  print(x - y % z);          // 7 - (3 % 2) = 6
+
+  // shifts bind looser than + -
+  print(1 << z + 1);         // 1 << (2 + 1) = 8
+  print((1 << z) + 1);       // (1 << 2) + 1 = 5
+  print(x >> z - 1);         // 7 >> (2 - 1) = 3
+
+  // & binds tighter than ^, which binds tighter than |
+  print(x & y | z ^ 1);      // (7 & 3) | (2 ^ 1) = 3 | 3 = 3
+  print(x & (y | z) ^ 1);    // (7 & (3 | 2)) ^ 1 = 3 ^ 1 = 2
+  print(x | y & z);          // 7 | (3 & 2) = 7
+  print((x | y) & z);        // (7 | 3) & 2 = 2
+
+  // unary operators bind tightest
+  print(- x - - y);          // (-7) - (-3) = -4
+  print(-x * -y);            // (-7) * (-3) = 21
+  print(~x + 1);             // (~7) + 1 = -7
+  print(- ~ x);              // -(~7) = 8
+  print(~ - x);              // ~(-7) = 6
+  print(-x << 1);            // (-7) << 1 = -14
+}

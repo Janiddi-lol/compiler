@@ -1,0 +1,5 @@
+def main() {
+  // far too large for a 64-bit integer
+  var x = 123456789012345678901234567890 : int;
+  print(x);
+}

@@ -1,0 +1,13 @@
+// comparisons are signed
+def main() {
+  var max = 9223372036854775807 : int;
+  var min = -9223372036854775807 - 1 : int;
+  if (-1 < 0) { print(1); } else { print(-1); }
+  if (-5 <= -5) { print(2); } else { print(-2); }
+  if (min >= 0) { print(-3); } else { print(3); }
+  if (min - 1 == max) { print(4); } else { print(-4); }
+  if (~0 != -1) { print(-5); } else { print(5); }
+  if (-3 > 2) { print(-6); } else { print(6); }
+  if (max > 0) { print(7); } else { print(-7); }
+  if (min < 0) { print(8); } else { print(-8); }
+}

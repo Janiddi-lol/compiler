@@ -1,0 +1,5 @@
+// booleans and integers do not mix
+def main() {
+  var b = true : bool;
+  print(b + 1);
+}

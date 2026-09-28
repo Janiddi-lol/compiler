@@ -1,0 +1,29 @@
+# Python-generated files
+__pycache__/
+*.py[cod]
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Virtual environment
+.venv/
+
+# Operating system and editor
+.DS_Store
+.vscode/
+.claude/
+
+# Generated compiler output
+*.tac
+*.s
+*.exe
+
+# Generated submission archives
+bxc.zip
+
+# Supplied/reference material
+_lecture_materials/
+
+# Throwaway demonstrations
+scratch/
