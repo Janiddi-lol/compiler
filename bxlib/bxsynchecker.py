@@ -88,4 +88,4 @@ class SynChecker:
 def check(prgm : Program, reporter : Reporter):
     with reporter.checkpoint() as checkpoint:
         SynChecker(reporter).check(prgm)
-        return bool(checkpoint) 
+        return bool(checkpoint)

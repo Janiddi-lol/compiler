@@ -11,19 +11,11 @@ from .bxerrors import Range, Reporter
 class Lexer:
     keywords = {
         x: x.upper() for x in (
-            'bool'    ,
-            'break'   ,
-            'continue',
-            'def'     ,
-            'else'    ,
-            'false'   ,
-            'if'      ,
-            'int'     ,
-            'main'    ,
-            'print'   ,
-            'true'    ,
-            'var'     ,
-            'while'   ,
+            'def'  ,
+            'int'  ,
+            'main' ,
+            'print',
+            'var'  ,
         )
     }
     
@@ -40,22 +32,13 @@ class Lexer:
         'SEMICOLON',
 
         'AMP'      ,
-        'AMPAMP'   ,
-        'BANG'     ,
-        'BANGEQ'   ,
         'DASH'     ,
         'EQ'       ,
-        'EQEQ'     ,
-        'GT'       ,
-        'GTEQ'     ,
         'GTGT'     ,
         'HAT'      ,
-        'LT'       ,
-        'LTEQ'     ,
         'LTLT'     ,
         'PCENT'    ,
         'PIPE'     ,
-        'PIPEPIPE' ,
         'PLUS'     ,
         'SLASH'    ,
         'STAR'     ,
@@ -70,22 +53,13 @@ class Lexer:
     t_SEMICOLON = re.escape(';')
 
     t_AMP       = re.escape('&')
-    t_AMPAMP    = re.escape('&&')
-    t_BANG      = re.escape('!')
-    t_BANGEQ    = re.escape('!=')
     t_DASH      = re.escape('-')
     t_EQ        = re.escape('=')
-    t_EQEQ      = re.escape('==')
-    t_GT        = re.escape('>')
-    t_GTEQ      = re.escape('>=')
     t_GTGT      = re.escape('>>')
     t_HAT       = re.escape('^')
-    t_LT        = re.escape('<')
-    t_LTEQ      = re.escape('<=')
     t_LTLT      = re.escape('<<')
     t_PCENT     = re.escape('%')
     t_PIPE      = re.escape('|')
-    t_PIPEPIPE  = re.escape('||')
     t_PLUS      = re.escape('+')
     t_SLASH     = re.escape('/')
     t_STAR      = re.escape('*')

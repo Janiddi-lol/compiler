@@ -22,16 +22,6 @@ OPCODES = {
     'arithmetic-right-shift': 'shr',
 }
 
-# Conditional jumps: opcode -> condition on the (integer) argument
-JUMPS = {
-    'jz'  : '== 0',
-    'jnz' : '!= 0',
-    'jl'  : '< 0' ,
-    'jnl' : '>= 0',
-    'jle' : '<= 0',
-    'jnle': '> 0' ,
-}
-
 # --------------------------------------------------------------------
 @dc.dataclass
 class TAC:
@@ -40,8 +30,6 @@ class TAC:
     result    : Opt[str] = None
 
     def __str__(self):
-        if self.opcode == 'label':
-            return f'{self.arguments[0]}:'
         aout = self.opcode
         if self.arguments:
             aout += ' ' + ', '.join(str(x) for x in self.arguments)
@@ -52,7 +40,4 @@ class TAC:
 # --------------------------------------------------------------------
 def tac_to_string(name: str, body: list[TAC]) -> str:
     """The textual form of a TAC procedure"""
-    lines = [f'proc {name}:']
-    for instr in body:
-        lines.append(str(instr) if instr.opcode == 'label' else f'  {instr}')
-    return '\n'.join(lines) + '\n'
+    return '\n'.join([f'proc {name}:'] + [f'  {instr}' for instr in body]) + '\n'
