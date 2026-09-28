@@ -127,7 +127,7 @@ class Parser:
     """
     def p_epxression_int(self, p):
         """expr : NUMBER""" # p[0] = expr 
-        p[0] = Name(
+        p[0] = IntExpression(
             value = p[1],
             position=self._position(p)
         ) 
