@@ -15,10 +15,9 @@ from bxlib.bxast        import *
 from bxlib.bxerrors     import DefaultReporter
 from bxlib.bxmm         import lower
 from bxlib.bxtac        import tac_to_string
-from bxlib.bxtacrun     import run as runtac, TACError
 from bxlib.bxasmgen     import AsmGen, AsmGenError
 from bxlib.bxparser     import Parser
-from bxlib.bxtychecker  import check as tycheck
+from bxlib.bxsynchecker import check as syncheck
 
 # ====================================================================
 # Parse command line arguments
@@ -28,6 +27,15 @@ def parse_args():
 
     parser.add_argument('input', help = 'input file (.bx)')
 
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        '--tmm', dest = 'mode', action = 'store_const', const = 'tmm',
+        help = 'use top-down maximal munch')
+    group.add_argument(
+        '--bmm', dest = 'mode', action = 'store_const', const = 'bmm',
+        help = 'use bottom-up maximal munch (default)')
+    parser.set_defaults(mode = 'bmm')
+
     parser.add_argument(
         '--dump-ast', action = 'store_true',
         help = 'print the AST on the standard output and exit')
@@ -35,10 +43,6 @@ def parse_args():
     parser.add_argument(
         '--tac-only', action = 'store_true',
         help = 'stop after the generation of the TAC (.tac) file')
-
-    parser.add_argument(
-        '--run-tac', action = 'store_true',
-        help = 'interpret the TAC instead of compiling it to assembly')
 
     parser.add_argument(
         '--arch', choices = sorted(AsmGen.BACKENDS.keys()),
@@ -88,7 +92,7 @@ def _main():
         print(f'cannot read input file {args.input}: {e}', file = sys.stderr)
         exit(1)
 
-    # Frontend (provided): lexing, parsing, type checking.
+    # Frontend (provided): lexing, parsing, syntactic checks.
     # Errors are reported on the standard error by `reporter`.
     reporter = DefaultReporter(source = prgm)
     prgm = Parser(reporter = reporter).parse(prgm)
@@ -97,7 +101,7 @@ def _main():
     if prgm is None:
         exit(1)
 
-    if not tycheck(prgm, reporter):
+    if not syncheck(prgm, reporter):
         exit(1)
 
     if args.dump_ast:
@@ -105,7 +109,7 @@ def _main():
         exit(0)
 
     # Lowering (yours): AST -> TAC
-    body = lower(prgm)
+    body = lower(prgm, mode = args.mode)
 
     # Write the TAC program, in its textual form
     try:
@@ -119,15 +123,7 @@ def _main():
     if args.tac_only:
         exit(0)
 
-    if args.run_tac:
-        try:
-            runtac(body)
-        except TACError as e:
-            print(f'{basename}.tac: {e}', file = sys.stderr)
-            exit(1)
-        exit(0)
-
-    # Backend: TAC -> assembly -> executable
+    # Backend (provided): straightline TAC -> assembly -> executable
     backend, native = select_backend(args.arch)
 
     try:
