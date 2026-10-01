@@ -96,3 +96,109 @@ def test_variable_expression():
     assert isinstance(statement.value, VarExpression)
     assert statement.value.name.value == "x"
 
+#--------------------Test operator precedence--------------
+def test_multiplication_has_higher_precedence_than_addition():
+    program, reporter = parse_source(
+        """
+        def main() {
+            print(1 + 2 * 3);
+        }
+        """
+    )
+
+    assert reporter.nerrors == 0
+
+    expression = program[0].value
+
+    assert isinstance(expression, OpAppExpression)
+    assert expression.operator == "addition"
+
+    left, right = expression.arguments
+
+    assert isinstance(left, IntExpression)
+    assert left.value == 1
+
+    assert isinstance(right, OpAppExpression)
+    assert right.operator == "multiplication"
+    assert [argument.value for argument in right.arguments] == [2, 3]
+    
+# ------------ Test Parantheses---------------------------------
+def test_parentheses_override_precedence():
+    program, reporter = parse_source(
+        """
+        def main() {
+            print((1 + 2) * 3);
+        }
+        """
+    )
+
+    assert reporter.nerrors == 0
+
+    expression = program[0].value
+
+    assert expression.operator == "multiplication"
+
+    left, right = expression.arguments
+
+    assert isinstance(left, OpAppExpression)
+    assert left.operator == "addition"
+    assert right.value == 3
+    
+# --------------------Test unary precedence----------------------
+def test_unary_minus_binds_before_addition():
+    program, reporter = parse_source(
+        """
+        def main() {
+            print(-1 + 2);
+        }
+        """
+    )
+
+    assert reporter.nerrors == 0
+
+    expression = program[0].value
+
+    assert expression.operator == "addition"
+
+    left, right = expression.arguments
+
+    assert isinstance(left, OpAppExpression)
+    assert left.operator == "opposite"
+    assert left.arguments[0].value == 1
+    assert right.value == 2
+
+# ---------- Test multiple statements---------------
+def test_multiple_statements_preserve_order():
+    program, reporter = parse_source(
+        """
+    def main() {
+        var x = 1 : int;
+        x = 2;
+        print(x);
+    }
+    """
+    )
+
+    assert reporter.nerrors == 0
+    assert len(program) == 3
+
+    assert isinstance(program[0], VarDeclStatement)
+    assert isinstance(program[1], AssignStatement)
+    assert isinstance(program[2], PrintStatement)
+    
+# ---------------Test a syntax error-----------------
+
+def test_missing_semicolon_reports_error(capsys):
+    program, reporter = parse_source(
+        """
+        def main() {
+            print(42)
+        }
+        """
+    )
+
+    captured = capsys.readouterr()
+
+    assert program is None
+    assert reporter.nerrors >= 1
+    assert "syntax error" in captured.err
