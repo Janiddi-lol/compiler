@@ -2,7 +2,7 @@
 import abc
 import re
 
-from .bxtac import TAC
+from .bxtac import JUMPS, TAC
 
 # ====================================================================
 # Straightline TAC to assembly
@@ -44,9 +44,18 @@ class AsmGen(abc.ABC):
         'shl'  : (2, True ),
         'shr'  : (2, True ),
         'print': (1, False),
+        'label': (1, False),
+        'jmp'  : (1, False),
+        'jz'   : (2, False),
+        'jnz'  : (2, False),
+        'jl'   : (2, False),
+        'jnl'  : (2, False),
+        'jle'  : (2, False),
+        'jnle' : (2, False),
     }
 
-    TEMP = re.compile(r'%(0|[1-9][0-9]*|[A-Za-z][A-Za-z0-9_]*)\Z')
+    TEMP  = re.compile(r'%(0|[1-9][0-9]*|[A-Za-z][A-Za-z0-9_]*)\Z')
+    LABEL = re.compile(r'%\.L(0|[1-9][0-9]*|[A-Za-z_][A-Za-z0-9_]*)\Z')
 
     def __init__(self):
         self._temps = dict()
@@ -76,8 +85,12 @@ class AsmGen(abc.ABC):
     def _emit(self, opcode, *args):
         self._asm.append(self._get_asm(opcode, *args))
 
+    @staticmethod
+    def _label(lbl):
+        return lbl[1:]          # %.L42 -> .L42
+
     def _emit_label(self, lbl):
-        self._asm.append(self._get_label(lbl))
+        self._asm.append(self._get_label(self._label(lbl)))
 
     # ---- validation of one TAC instruction
     @classmethod
@@ -87,6 +100,9 @@ class AsmGen(abc.ABC):
 
         def is_temp(x):
             return isinstance(x, str) and cls.TEMP.match(x) is not None
+
+        def is_label(x):
+            return isinstance(x, str) and cls.LABEL.match(x) is not None
 
         def is_int64(x):
             return isinstance(x, int) and not isinstance(x, bool) \
@@ -113,10 +129,13 @@ class AsmGen(abc.ABC):
         if not hasresult and result is not None:
             error(f"`{opcode}' does not produce a result")
 
-        for arg in args:
+        for index, arg in enumerate(args):
             if opcode == 'const':
                 if not is_int64(arg):
                     error("`const' expects a 64-bit integer argument")
+            elif opcode in ('label', 'jmp') or (opcode in JUMPS and index == 1):
+                if not is_label(arg):
+                    error(f"`{opcode}' expects a label (%.Lxxx) as argument")
             elif not is_temp(arg):
                 error(f"`{opcode}' expects temporaries as arguments")
 
@@ -130,6 +149,23 @@ class AsmGen(abc.ABC):
     def _emit_nop(self):
         pass
 
+    @classmethod
+    def _check_labels(cls, body: list[TAC]):
+        labels = set()
+
+        for instr in body:
+            if isinstance(instr, TAC) and instr.opcode == 'label':
+                label = instr.arguments[0]
+                if label in labels:
+                    raise AsmGenError(f'duplicate label: {instr}')
+                labels.add(label)
+
+        for instr in body:
+            if isinstance(instr, TAC) and (instr.opcode == 'jmp' or instr.opcode in JUMPS):
+                label = instr.arguments[-1]
+                if label not in labels:
+                    raise AsmGenError(f'jump to an undefined label: {instr}')
+
     @abc.abstractmethod
     def _prologue(self, nslots: int) -> list[str]:
         pass
@@ -140,6 +176,7 @@ class AsmGen(abc.ABC):
 
     @classmethod
     def lower(cls, body: list[TAC]) -> str:
+        cls._check_labels(body)
         emitter = cls()
 
         for instr in body:
@@ -248,8 +285,33 @@ class AsmGen_x64_Linux(AsmGen):
     def _emit_shr(self, op1, op2, dst):
         self._emit_shift('sarq', op1, op2, dst)
 
+    def _emit_jmp(self, lbl):
+        self._emit('jmp', self._label(lbl))
+
+    def _emit_cjmp(self, condition, src, lbl):
+        self._emit('cmpq', '$0', self._temp(src))
+        self._emit(condition, self._label(lbl))
+
+    def _emit_jz(self, src, lbl):
+        self._emit_cjmp('jz', src, lbl)
+
+    def _emit_jnz(self, src, lbl):
+        self._emit_cjmp('jnz', src, lbl)
+
+    def _emit_jl(self, src, lbl):
+        self._emit_cjmp('jl', src, lbl)
+
+    def _emit_jnl(self, src, lbl):
+        self._emit_cjmp('jge', src, lbl)
+
+    def _emit_jle(self, src, lbl):
+        self._emit_cjmp('jle', src, lbl)
+
+    def _emit_jnle(self, src, lbl):
+        self._emit_cjmp('jg', src, lbl)
+
     def _emit_print(self, src):
-        self._emit('leaq', '.Lprintfmt(%rip)', '%rdi')
+        self._emit('leaq', '.Lbx.printfmt(%rip)', '%rdi')
         self._emit('movq', self._temp(src), '%rsi')
         self._emit('xorq', '%rax', '%rax')
         self._emit('callq', 'printf@PLT')
@@ -257,7 +319,7 @@ class AsmGen_x64_Linux(AsmGen):
     def _prologue(self, nslots):
         return [
             self._get_asm('.section', '.rodata'),
-            self._get_label('.Lprintfmt'),
+            self._get_label('.Lbx.printfmt'),
             self._get_asm('.string', '"%ld\\n"'),
             self._get_asm('.text'),
             self._get_asm('.globl', 'main'),
@@ -367,13 +429,41 @@ class AsmGen_arm64_Darwin(AsmGen):
     def _emit_shr(self, op1, op2, dst):
         self._emit_alu2('asr', op1, op2, dst)
 
+    def _emit_jmp(self, lbl):
+        self._emit('b', self._label(lbl))
+
+    def _emit_jz(self, src, lbl):
+        self._emit('ldr', 'X9', self._temp(src))
+        self._emit('cbz', 'X9', self._label(lbl))
+
+    def _emit_jnz(self, src, lbl):
+        self._emit('ldr', 'X9', self._temp(src))
+        self._emit('cbnz', 'X9', self._label(lbl))
+
+    def _emit_cjmp(self, condition, src, lbl):
+        self._emit('ldr', 'X9', self._temp(src))
+        self._emit('cmp', 'X9', '#0')
+        self._emit(condition, self._label(lbl))
+
+    def _emit_jl(self, src, lbl):
+        self._emit_cjmp('b.lt', src, lbl)
+
+    def _emit_jnl(self, src, lbl):
+        self._emit_cjmp('b.ge', src, lbl)
+
+    def _emit_jle(self, src, lbl):
+        self._emit_cjmp('b.le', src, lbl)
+
+    def _emit_jnle(self, src, lbl):
+        self._emit_cjmp('b.gt', src, lbl)
+
     def _emit_print(self, src):
         # printf is variadic: on arm64/macOS, variadic arguments go
         # on the stack (16-bytes aligned)
         self._emit('ldr' , 'X9', self._temp(src))
         self._emit('str' , 'X9', '[SP, #-16]!')
-        self._emit('adrp', 'X0', 'l._printfmt@PAGE')
-        self._emit('add' , 'X0', 'X0', 'l._printfmt@PAGEOFF')
+        self._emit('adrp', 'X0', 'l._bx_printfmt@PAGE')
+        self._emit('add' , 'X0', 'X0', 'l._bx_printfmt@PAGEOFF')
         self._emit('bl'  , '_printf')
         self._emit('add' , 'SP', 'SP', '#16')
 
@@ -394,7 +484,7 @@ class AsmGen_arm64_Darwin(AsmGen):
             self._get_asm('mov', 'X0', '#0'),
             self._get_asm('ret'),
             self._get_asm('.data'),
-            self._get_label('l._printfmt'),
+            self._get_label('l._bx_printfmt'),
             self._get_asm('.asciz', '"%lld\\n"'),
         ]
 
@@ -409,8 +499,8 @@ class AsmGen_arm64_Linux(AsmGen_arm64_Darwin):
     def _emit_print(self, src):
         # on Linux, variadic arguments are passed in registers
         self._emit('ldr' , 'X1', self._temp(src))
-        self._emit('adrp', 'X0', '.Lprintfmt')
-        self._emit('add' , 'X0', 'X0', ':lo12:.Lprintfmt')
+        self._emit('adrp', 'X0', '.Lbx.printfmt')
+        self._emit('add' , 'X0', 'X0', ':lo12:.Lbx.printfmt')
         self._emit('bl'  , 'printf')
 
     def _prologue(self, nslots):
@@ -429,7 +519,7 @@ class AsmGen_arm64_Linux(AsmGen_arm64_Darwin):
             self._get_asm('mov', 'X0', '#0'),
             self._get_asm('ret'),
             self._get_asm('.section', '.rodata'),
-            self._get_label('.Lprintfmt'),
+            self._get_label('.Lbx.printfmt'),
             self._get_asm('.asciz', '"%lld\\n"'),
         ]
 
