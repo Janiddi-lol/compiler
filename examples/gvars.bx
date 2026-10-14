@@ -1,0 +1,27 @@
+// global variables, read and written from several procedures
+
+var counter = 0 : int;
+var total = 100 : int;
+var verbose = true : bool;
+
+def tick() {
+  counter = counter + 1;
+  total = total - counter;
+}
+
+def report() {
+  if (verbose) { print(counter); }
+  print(total);
+}
+
+def main() {
+  var i = 0 : int;
+  while (i < 4) {
+    tick();
+    i = i + 1;
+  }
+  report();
+  verbose = false;
+  tick();
+  report();
+}

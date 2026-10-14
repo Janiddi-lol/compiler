@@ -1,0 +1,2 @@
+// no main procedure
+def f() { print(1); }

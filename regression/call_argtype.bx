@@ -1,0 +1,3 @@
+// argument of the wrong type
+def f(x : int) : int { return x; }
+def main() { print(f(true)); }

@@ -1,0 +1,3 @@
+// procedures are not variables
+def f() { }
+def main() { f = 1; print(f); }

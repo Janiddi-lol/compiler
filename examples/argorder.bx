@@ -1,0 +1,18 @@
+// arguments are evaluated from left to right, before the call
+
+var n = 0 : int;
+
+def next() : int {
+  n = n + 1;
+  return n;
+}
+
+def sub3(a, b, c : int) : int {
+  return a * 100 + b * 10 + c;
+}
+
+def main() {
+  print(sub3(next(), next(), next()));
+  print(sub3(next(), sub3(next(), next(), next()), next()));
+  print(n);
+}

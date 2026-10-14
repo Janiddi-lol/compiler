@@ -22,7 +22,9 @@ OPCODES = {
     'arithmetic-right-shift': 'shr',
 }
 
-# Conditional jumps: opcode -> condition on the (integer) argument
+# Conditional jumps: opcode -> condition on the (integer) argument.
+# Control also has `jmp LABEL`, `ret` / `ret VALUE` (exit from the
+# procedure), and `param N, VALUE` / `RESULT = call @PROC, N` for calls.
 JUMPS = {
     'jz'  : '== 0',
     'jnz' : '!= 0',
@@ -50,9 +52,37 @@ class TAC:
         return aout + ';'
 
 # --------------------------------------------------------------------
-def tac_to_string(name: str, body: list[TAC]) -> str:
-    """The textual form of a TAC procedure"""
-    lines = [f'proc {name}:']
-    for instr in body:
-        lines.append(str(instr) if instr.opcode == 'label' else f'  {instr}')
-    return '\n'.join(lines) + '\n'
+# A TAC program (compilation unit) is a list of global variables and
+# procedures. Globals are named `@x` and are valid operands wherever a
+# temporary is. Procedures are named `@f`; their parameters are the
+# named temporaries `%x`.
+
+@dc.dataclass
+class TACVar:
+    name  : str                 # @x
+    init  : int
+
+    def __str__(self):
+        return f'var {self.name} = {self.init};'
+
+@dc.dataclass
+class TACProc:
+    name      : str             # @f
+    arguments : list[str]       # [%x, %y]
+    body      : list[TAC]
+
+    def __str__(self):
+        head = self.name
+        if self.arguments:
+            head += '(' + ', '.join(self.arguments) + ')'
+        lines = [f'proc {head}:']
+        for instr in self.body:
+            lines.append(str(instr) if instr.opcode == 'label' else f'  {instr}')
+        return '\n'.join(lines)
+
+TACUnit = list[TACVar | TACProc]
+
+# --------------------------------------------------------------------
+def unit_to_string(unit: TACUnit) -> str:
+    """The textual form of a TAC program"""
+    return '\n\n'.join(str(decl) for decl in unit) + '\n'

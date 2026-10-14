@@ -1,0 +1,22 @@
+var m = 0 : int;
+var n = 1 : int;
+
+def fib_update() {
+    var x = m + n : int;
+    m = n;
+    n = x;
+    return;
+}
+def main() {
+    var n = 10 : int;
+
+    while (true) {
+        n = n - 1;
+        if (n == 0) {
+            break;
+        }
+        
+        fib_update();
+    }
+    print(m);
+}

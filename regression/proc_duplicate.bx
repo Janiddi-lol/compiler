@@ -1,0 +1,4 @@
+// procedures are declared once
+def f() { }
+def f(x : int) { }
+def main() { f(); }

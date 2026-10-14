@@ -1,0 +1,20 @@
+// booleans as parameters and results
+
+def xor(a, b : bool) : bool {
+  return (a || b) && !(a && b);
+}
+
+def implies(a, b : bool) : bool {
+  if (a) { return b; }
+  return true;
+}
+
+def main() {
+  print(xor(true, true));
+  print(xor(true, false));
+  print(implies(false, false));
+  print(implies(true, false));
+  var b = xor(implies(true, true), false) : bool;
+  if (b) { print(1); } else { print(0); }
+  print(!b);
+}

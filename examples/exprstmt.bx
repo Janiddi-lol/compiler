@@ -1,0 +1,17 @@
+// expressions as statements: the value, if any, is discarded
+
+var calls = 0 : int;
+
+def count() : int {
+  calls = calls + 1;
+  return calls;
+}
+
+def main() {
+  count();
+  count() + count();
+  42;
+  count() * 0;
+  print(calls);
+  print(count());
+}

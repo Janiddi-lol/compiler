@@ -19,6 +19,7 @@ class Range:
     
 # --------------------------------------------------------------------
 class Type(enum.Enum):
+    VOID = 0                    # the "type" of subroutine calls
     BOOL = 1
     INT  = 2
 
@@ -62,6 +63,17 @@ class OpAppExpression(Expression):
     arguments: list[Expression]
 
 # --------------------------------------------------------------------
+@dc.dataclass
+class CallExpression(Expression):
+    proc: Name
+    arguments: list[Expression]
+
+# --------------------------------------------------------------------
+@dc.dataclass
+class PrintExpression(Expression):
+    argument: Expression
+
+# --------------------------------------------------------------------
 class Statement(AST):
     pass
 
@@ -72,7 +84,7 @@ Block = list[Statement]
 @dc.dataclass
 class VarDeclStatement(Statement):
     name: Name
-    init: Expression    
+    init: Expression
     type_: Type
 
 # --------------------------------------------------------------------
@@ -83,9 +95,9 @@ class AssignStatement(Statement):
 
 # --------------------------------------------------------------------
 @dc.dataclass
-class PrintStatement(Statement):
-    value: Expression
- 
+class ExprStatement(Statement):
+    expression: Expression
+
 # --------------------------------------------------------------------
 @dc.dataclass
 class BlockStatement(Statement):
@@ -115,4 +127,28 @@ class ContinueStatement(Statement):
     pass
 
 # --------------------------------------------------------------------
-Program = Block
+@dc.dataclass
+class ReturnStatement(Statement):
+    expr: Opt[Expression]
+
+# --------------------------------------------------------------------
+class TopDecl(AST):
+    pass
+
+# --------------------------------------------------------------------
+@dc.dataclass
+class GlobVarDecl(TopDecl):
+    name: Name
+    init: Expression
+    type_: Type
+
+# --------------------------------------------------------------------
+@dc.dataclass
+class ProcDecl(TopDecl):
+    name: Name
+    arguments: list[tuple[list[Name], Type]]    # parameter groups
+    rettype: Opt[Type]                          # None for subroutines
+    body: Statement
+
+# --------------------------------------------------------------------
+Program = list[TopDecl]

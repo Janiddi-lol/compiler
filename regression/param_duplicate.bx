@@ -1,0 +1,3 @@
+// parameters are distinct
+def f(x : int, x : bool) { }
+def main() { f(1, true); }

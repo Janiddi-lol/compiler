@@ -1,0 +1,3 @@
+// a parameter cannot be redeclared in the body's outermost scope
+def f(x : int) : int { var x = 1 : int; return x; }
+def main() { print(f(2)); }

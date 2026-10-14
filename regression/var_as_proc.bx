@@ -1,0 +1,3 @@
+// variables are not procedures
+var f = 0 : int;
+def main() { f(); }

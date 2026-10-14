@@ -1,0 +1,11 @@
+// deep (non tail) recursion: the stack frames must be released
+
+def sum(n : int) : int {
+  if (n == 0) { return 0; }
+  return n + sum(n - 1);
+}
+
+def main() {
+  print(sum(1000));
+  print(sum(5000));
+}

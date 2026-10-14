@@ -19,8 +19,8 @@ class Lexer:
             'false'   ,
             'if'      ,
             'int'     ,
-            'main'    ,
             'print'   ,
+            'return'  ,
             'true'    ,
             'var'     ,
             'while'   ,
@@ -37,6 +37,7 @@ class Lexer:
         'LBRACE'   ,
         'RBRACE'   ,
         'COLON'    ,
+        'COMMA'    ,
         'SEMICOLON',
 
         'AMP'      ,
@@ -67,6 +68,7 @@ class Lexer:
     t_LBRACE    = re.escape('{')
     t_RBRACE    = re.escape('}')
     t_COLON     = re.escape(':')
+    t_COMMA     = re.escape(',')
     t_SEMICOLON = re.escape(';')
 
     t_AMP       = re.escape('&')

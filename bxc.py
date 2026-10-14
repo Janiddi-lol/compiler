@@ -14,7 +14,8 @@ import sys
 from bxlib.bxast        import *
 from bxlib.bxerrors     import DefaultReporter
 from bxlib.bxmm         import lower
-from bxlib.bxtac        import tac_to_string
+from bxlib.bxcfg        import optimize
+from bxlib.bxtac        import TACProc, unit_to_string
 from bxlib.bxtacrun     import run as runtac, TACError
 from bxlib.bxasmgen     import AsmGen, AsmGenError
 from bxlib.bxparser     import Parser
@@ -35,6 +36,10 @@ def parse_args():
     parser.add_argument(
         '--tac-only', action = 'store_true',
         help = 'stop after the generation of the TAC (.tac) file')
+
+    parser.add_argument(
+        '--no-cfg', action = 'store_true',
+        help = 'skip the CFG simplifications (bxlib/bxcfg.py)')
 
     parser.add_argument(
         '--run-tac', action = 'store_true',
@@ -104,13 +109,19 @@ def _main():
         pprint.pprint(prgm)
         exit(0)
 
-    # Lowering (yours): AST -> TAC
-    body = lower(prgm)
+    # Lowering: AST -> TAC (a list of global variables and procedures)
+    unit = lower(prgm)
+
+    # Control flow graph: simplify the body of every procedure
+    if not args.no_cfg:
+        for decl in unit:
+            if isinstance(decl, TACProc):
+                decl.body = optimize(decl.body)
 
     # Write the TAC program, in its textual form
     try:
         with open(f'{basename}.tac', 'w') as stream:
-            stream.write(tac_to_string('@main', body))
+            stream.write(unit_to_string(unit))
 
     except IOError as e:
         print(f'cannot write output file {basename}.tac: {e}', file = sys.stderr)
@@ -121,7 +132,7 @@ def _main():
 
     if args.run_tac:
         try:
-            runtac(body)
+            runtac(unit)
         except TACError as e:
             print(f'{basename}.tac: {e}', file = sys.stderr)
             exit(1)
@@ -131,7 +142,7 @@ def _main():
     backend, native = select_backend(args.arch)
 
     try:
-        asm = backend.lower(body)
+        asm = backend.lower(unit)
 
     except AsmGenError as e:
         print(f'{args.input}: {e}', file = sys.stderr)
@@ -151,8 +162,11 @@ def _main():
             'not assembling it', file = sys.stderr)
         exit(0)
 
+    # Link with the runtime (print)
+    runtime = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bxlib', 'bxruntime.c')
+
     try:
-        sp.check_call(['gcc', '-o', f'{basename}.exe', f'{basename}.s'])
+        sp.check_call(['gcc', '-o', f'{basename}.exe', f'{basename}.s', runtime])
 
     except FileNotFoundError:
         print('cannot find gcc: the executable has not been produced', file = sys.stderr)

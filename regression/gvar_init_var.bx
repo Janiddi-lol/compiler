@@ -1,0 +1,4 @@
+// a global initializer cannot refer to another variable
+var x = 1 : int;
+var y = x : int;
+def main() { print(y); }

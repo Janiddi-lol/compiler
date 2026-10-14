@@ -1,0 +1,17 @@
+// calls inside the arguments of calls and inside conditions
+
+def sq(x : int) : int { return x * x; }
+def add(x, y : int) : int { return x + y; }
+def max(x, y : int) : int { if (x > y) { return x; } return y; }
+
+def main() {
+  print(add(sq(3), sq(4)));
+  print(max(add(1, 2), sq(2)));
+  print(sq(sq(sq(2))));
+  var i = 0 : int;
+  while (sq(i) < add(i, 20)) {
+    print(i);
+    i = i + 1;
+  }
+  if (max(i, 10) == 10 && sq(i) == 25) { print(100); }
+}

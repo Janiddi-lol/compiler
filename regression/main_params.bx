@@ -1,0 +1,2 @@
+// main takes no parameter
+def main(x : int) { print(x); }

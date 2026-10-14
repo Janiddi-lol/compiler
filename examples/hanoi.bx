@@ -1,0 +1,16 @@
+// towers of Hanoi: prints the moves as 10 * from + to
+
+var moves = 0 : int;
+
+def hanoi(n, from, to, via : int) {
+  if (n == 0) { return; }
+  hanoi(n - 1, from, via, to);
+  print(10 * from + to);
+  moves = moves + 1;
+  hanoi(n - 1, via, to, from);
+}
+
+def main() {
+  hanoi(3, 1, 3, 2);
+  print(moves);
+}

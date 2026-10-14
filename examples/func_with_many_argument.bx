@@ -1,0 +1,16 @@
+def func(a1, a2, a3, a4, a5, a6, a7, a8: int) : int {
+    var sum = 0 : int;
+    sum = sum + a1;
+    sum = sum + a2 * a2;
+    sum = sum + a3 * a3 * a3;
+    sum = sum + a4 * a4 * a4 * a4;
+    sum = sum + a5 * a5 * a5 * a5 * a5;
+    sum = sum + a6 * a6 * a6 * a6 * a6 * a6;
+    sum = sum + a7 * a7 * a7 * a7 * a7 * a7 * a7;
+    sum = sum + a8 * a8 * a8 * a8 * a8 * a8 * a8 * a8;
+
+    return sum;
+}
+def main() {
+    print(func(8, 7, 6, 5, 4, 3, 2, 1));
+}

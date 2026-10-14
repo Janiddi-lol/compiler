@@ -158,6 +158,35 @@ class Parser:
         """expr : LPAREN expr RPAREN"""
         p[0] = p[2]
 
+    def p_expression_call(self, p):
+        """expr : name LPAREN exprs RPAREN"""
+        p[0] = CallExpression(
+            proc      = p[1],
+            arguments = p[3],
+            position  = self._position(p),
+        )
+
+    def p_expression_print(self, p):
+        """expr : PRINT LPAREN expr RPAREN"""
+        p[0] = PrintExpression(
+            argument = p[3],
+            position = self._position(p),
+        )
+
+    def p_exprs_1(self, p):
+        """exprs_1 : expr
+                   | exprs_1 COMMA expr"""
+        if len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = p[1]
+            p[0].append(p[3])
+
+    def p_exprs(self, p):
+        """exprs :
+                 | exprs_1"""
+        p[0] = [] if len(p) == 1 else p[1]
+
     def p_stmt_vardecl(self, p):
         """stmt : VAR name EQ expr COLON type SEMICOLON"""
         p[0] = VarDeclStatement(
@@ -175,11 +204,11 @@ class Parser:
             position = self._position(p),
         )
 
-    def p_stmt_print(self, p):
-        """stmt : PRINT LPAREN expr RPAREN SEMICOLON"""
-        p[0] = PrintStatement(
-            value    = p[3],
-            position = self._position(p),
+    def p_stmt_expr(self, p):
+        """stmt : expr SEMICOLON"""
+        p[0] = ExprStatement(
+            expression = p[1],
+            position   = self._position(p),
         )
 
     def p_stmt_if(self, p):
@@ -224,6 +253,14 @@ class Parser:
         """stmt : CONTINUE SEMICOLON"""
         p[0] = ContinueStatement(position = self._position(p))
 
+    def p_stmt_return(self, p):
+        """stmt : RETURN SEMICOLON
+                | RETURN expr SEMICOLON"""
+        p[0] = ReturnStatement(
+            expr     = p[2] if len(p) == 4 else None,
+            position = self._position(p),
+        )
+
     def p_stmt_block(self, p):
         """stmt : sblock"""
         p[0] = p[1]
@@ -248,9 +285,71 @@ class Parser:
         """stmts : stmts error SEMICOLON"""
         p[0] = p[1]
 
+    # ---- declarations
+    def p_names(self, p):
+        """names : name
+                 | names COMMA name"""
+        if len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = p[1]
+            p[0].append(p[3])
+
+    def p_param(self, p):
+        """param : names COLON type"""
+        p[0] = (p[1], p[3])
+
+    def p_params_1(self, p):
+        """params_1 : param
+                    | params_1 COMMA param"""
+        if len(p) == 2:
+            p[0] = [p[1]]
+        else:
+            p[0] = p[1]
+            p[0].append(p[3])
+
+    def p_params(self, p):
+        """params :
+                  | params_1"""
+        p[0] = [] if len(p) == 1 else p[1]
+
+    def p_rettype(self, p):
+        """rettype :
+                   | COLON type"""
+        p[0] = None if len(p) == 1 else p[2]
+
+    def p_procdecl(self, p):
+        """procdecl : DEF name LPAREN params RPAREN rettype sblock"""
+        p[0] = ProcDecl(
+            name      = p[2],
+            arguments = p[4],
+            rettype   = p[6],
+            body      = p[7],
+            position  = self._position(p),
+        )
+
+    def p_globvardecl(self, p):
+        """globvardecl : VAR name EQ expr COLON type SEMICOLON"""
+        p[0] = GlobVarDecl(
+            name     = p[2],
+            init     = p[4],
+            type_    = p[6],
+            position = self._position(p),
+        )
+
+    def p_topdecl(self, p):
+        """topdecl : procdecl
+                   | globvardecl"""
+        p[0] = p[1]
+
     def p_program(self, p):
-        """program : DEF MAIN LPAREN RPAREN LBRACE stmts RBRACE"""
-        p[0] = p[6]
+        """program :
+                   | program topdecl"""
+        if len(p) == 1:
+            p[0] = []
+        else:
+            p[0] = p[1]
+            p[0].append(p[2])
 
     def p_error(self, p):
         if p:

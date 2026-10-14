@@ -1,0 +1,2 @@
+// a value-less return in main is fine, a valued one is not
+def main() { return 0; }

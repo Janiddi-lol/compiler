@@ -1,0 +1,3 @@
+// a loop does not count as returning, even an infinite one
+def f(n : int) : int { while (n > 0) { return n; } }
+def main() { print(f(1)); }

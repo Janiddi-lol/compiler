@@ -1,0 +1,3 @@
+// a global initializer must have the declared type
+var b = 0 : bool;
+def main() { print(b); }

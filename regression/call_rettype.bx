@@ -1,0 +1,3 @@
+// result used at the wrong type
+def f() : bool { return true; }
+def main() { var x = f() : int; print(x); }

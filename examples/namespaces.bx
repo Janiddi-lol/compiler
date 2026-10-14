@@ -1,0 +1,13 @@
+// procedures and variables live in different name spaces
+
+var main = 42 : int;
+var f = 1 : int;
+
+def f() : int { return f + main; }
+
+def main() {
+  print(main);
+  print(f());
+  main = main + 1;
+  print(f());
+}

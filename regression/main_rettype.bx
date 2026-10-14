@@ -1,0 +1,2 @@
+// main returns nothing
+def main() : int { return 0; }

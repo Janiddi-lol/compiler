@@ -1,0 +1,3 @@
+// a subroutine call has no value
+def f() { print(1); }
+def main() { var x = f() : int; print(x); }

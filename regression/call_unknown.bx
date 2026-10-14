@@ -1,0 +1,2 @@
+// call to an undeclared procedure
+def main() { print(g(1)); }

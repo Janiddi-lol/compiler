@@ -1,0 +1,26 @@
+// parameters and local variables shadow global variables
+
+var x = 1 : int;
+var y = 2 : int;
+
+def f(x : int) : int {
+  var y = x * 10 : int;
+  return x + y;
+}
+
+def g() : int {
+  return x + y;
+}
+
+def main() {
+  print(f(5));
+  print(g());
+  var x = 100 : int;
+  {
+    var y = x + 1 : int;
+    print(f(y));
+  }
+  print(g());
+  x = 7;
+  print(g());
+}

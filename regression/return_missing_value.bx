@@ -1,0 +1,3 @@
+// a function must return a value
+def f() : int { return; }
+def main() { print(f()); }
